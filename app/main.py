@@ -114,11 +114,20 @@ def healthz():
 
 
 @app.middleware("http")
+async def vercel_path_rewrite(request: Request, call_next):
+    # If Vercel rewrote via ?path=..., extract the real client path
+    path_param = request.query_params.get("path")
+    if path_param:
+        if not path_param.startswith("/"):
+            path_param = "/" + path_param
+        request.scope["path"] = path_param
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def revalidate_static(request: Request, call_next):
     # browsers must re-check site files, so an updated version reaches every participant laptop
     response = await call_next(request)
-    response.headers["x-debug-path"] = str(request.scope.get("path", ""))
-    response.headers["x-debug-qs"] = str(request.scope.get("query_string", b"").decode("utf-8", "ignore"))
     if request.url.path.startswith("/static/") or request.url.path in ("/", "/run", "/admin", "/guide"):
         response.headers["Cache-Control"] = "no-cache"
     return response
