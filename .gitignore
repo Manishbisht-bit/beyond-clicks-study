@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+_server.log
+.pytest_cache/
+analysis/figures/
+.claude/
+*.private.txt
+*.zip
+backups/
+.vscode/
