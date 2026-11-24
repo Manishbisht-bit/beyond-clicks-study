@@ -117,6 +117,8 @@ def healthz():
 async def revalidate_static(request: Request, call_next):
     # browsers must re-check site files, so an updated version reaches every participant laptop
     response = await call_next(request)
+    response.headers["x-debug-path"] = str(request.scope.get("path", ""))
+    response.headers["x-debug-qs"] = str(request.scope.get("query_string", b"").decode("utf-8", "ignore"))
     if request.url.path.startswith("/static/") or request.url.path in ("/", "/run", "/admin", "/guide"):
         response.headers["Cache-Control"] = "no-cache"
     return response
