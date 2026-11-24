@@ -103,6 +103,21 @@ def migrate(dest_url: str, wipe_dest: bool = False):
             print(f"  • {name:15s}: {len(mappings)} rows copied")
             total_migrated += len(mappings)
 
+    # 4. Synchronize PostgreSQL auto-increment sequences
+    print("\n Synchronizing PostgreSQL sequences...")
+    from sqlalchemy import text
+    seq_tables = ['participants', 'tasks', 'event_batches', 'popups', 'ai_requests', 'labels', 'responses', 'audit']
+    with dest_engine.begin() as dest_conn:
+        for t in seq_tables:
+            dest_conn.execute(text(f"""
+                SELECT setval(
+                    pg_get_serial_sequence('{t}', 'id'),
+                    COALESCE((SELECT MAX(id) FROM {t}), 0) + 1,
+                    false
+                );
+            """))
+    print(" Sequences synchronized.")
+
     print(f"\n Migration complete! Total rows copied: {total_migrated}")
     print(" The main study is ready and pilot settings are frozen on Supabase.\n")
     return True
