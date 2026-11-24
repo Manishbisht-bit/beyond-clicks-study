@@ -110,7 +110,11 @@ def page_guide():
 
 @app.get("/healthz")
 def healthz():
-    return {"ok": True}
+    return {
+        "ok": True,
+        "is_postgres": config.DATABASE_URL.startswith("postgresql"),
+        "db_target": config.DATABASE_URL.split("@")[-1] if "@" in config.DATABASE_URL else "sqlite",
+    }
 
 
 @app.middleware("http")
