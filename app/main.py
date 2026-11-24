@@ -108,9 +108,15 @@ def page_guide():
     return FileResponse(config.STATIC_DIR / "guide.html")
 
 
-@app.get("/healthz")
-def healthz():
-    return {"ok": True}
+@app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def catch_all_debug(request: Request, full_path: str):
+    return {
+        "msg": "debug catch all",
+        "full_path": full_path,
+        "url_path": request.url.path,
+        "scope_path": request.scope.get("path"),
+        "x_matched_path": request.headers.get("x-matched-path"),
+    }
 
 
 @app.middleware("http")
