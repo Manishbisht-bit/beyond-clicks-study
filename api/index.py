@@ -21,4 +21,6 @@ async def app(scope, receive, send):
         elif scope.get("path", "").startswith("/api/index"):
             new_path = scope["path"][len("/api/index"):]
             scope["path"] = new_path if new_path else "/"
+        elif scope.get("path", "") == "/api" or scope.get("path", "") == "/api/":
+            scope["path"] = "/"
     await _app(scope, receive, send)
